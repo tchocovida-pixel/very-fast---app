@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="pt">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050506">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="Very Fast, onde você cria a tua própria oportunidade.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark}[hidden]{display:none!important}</style>
+<title>Very Fast</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: one full-height phone column. Top bar, swipe feed like TikTok, bottom tab bar like Facebook/TikTok. Black ground, brushed-silver accents. */
+:root{
+  --bg:#050506;
+  --surface:#0f1113;
+  --surface-2:#171a1d;
+  --line:#272b30;
+  --silver:#c8cdd5;
+  --silver-hi:#f3f5f8;
+  --muted:#8c939d;
+  --danger:#ff7a6c;
+  --ok:#72d6a0;
+  --metal:linear-gradient(135deg,#f6f8fb 0%,#aeb5bf 38%,#eceff3 62%,#8a919b 100%);
+  --f-display:'Unbounded','Arial Black',system-ui,sans-serif;
+  --f-body:'Manrope',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--silver-hi);font-family:var(--f-body);font-size:15px;line-height:1.45;-webkit-tap-highlight-color:transparent;overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--silver-hi);outline-offset:2px}
+.g{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+#app{height:100%;display:flex;flex-direction:column;min-height:0}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:10px;background:var(--bg);border-bottom:1px solid var(--line)}
+.logo{display:flex;align-items:center;gap:8px;font-family:var(--f-display);font-weight:800;font-size:15px;letter-spacing:.05em}
+.logo svg{color:var(--silver-hi)}
+.logo span{background:var(--metal);-webkit-background-clip:text;background-clip:text;color:transparent}
+.seg{display:flex;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:3px}
+.seg button{border:0;background:none;color:var(--muted);font-weight:600;font-size:12.5px;padding:6px 12px;border-radius:999px;min-height:30px}
+.seg button[aria-pressed=true]{background:var(--metal);color:#050506}
+main{flex:1;min-height:0;position:relative}
+.view{height:100%;overflow-y:auto;overscroll-behavior:contain}
+.pad{padding-block:18px 28px}
+.tabs{display:flex;background:var(--bg);border-top:1px solid var(--line);padding-block:4px}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:0;color:var(--muted);font-size:10.5px;font-weight:600;min-height:52px;position:relative}
+.tab[aria-current=true]{color:var(--silver-hi)}
+.tab .pl{width:46px;height:30px;border-radius:10px;background:var(--metal);color:#050506;display:grid;place-items:center}
+.tab .dot{position:absolute;top:6px;left:calc(50% + 8px);min-width:16px;height:16px;border-radius:8px;background:var(--silver-hi);color:#050506;font-size:10px;font-weight:800;display:grid;place-items:center;padding:0 4px}
+svg.i{display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* feed */
+.feed{height:100%;overflow-y:auto;scroll-snap-type:y mandatory;overscroll-behavior:contain}
+.post{position:relative;height:100%;scroll-snap-align:start;scroll-snap-stop:always;overflow:hidden;background:#000}
+.poster{position:absolute;inset:0;background:
+  radial-gradient(120% 70% at 85% 8%,rgba(226,231,239,.24),transparent 60%),
+  radial-gradient(90% 60% at 8% 92%,rgba(150,158,170,.2),transparent 60%),
+  linear-gradient(var(--a,160deg),#0a0b0d,#1c1f24 55%,#08090a)}
+.poster .word{position:absolute;left:-2%;top:16%;font-family:var(--f-display);font-weight:800;font-size:min(24vw,130px);line-height:1;color:transparent;-webkit-text-stroke:1px rgba(200,205,213,.32);letter-spacing:-.02em;white-space:nowrap;transform:rotate(-8deg);transform-origin:left top}
+.poster .play{position:absolute;left:50%;top:42%;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;border:1.5px solid rgba(243,245,248,.55);display:grid;place-items:center;color:var(--silver-hi)}
+.poster video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000}
+.shade{position:absolute;inset:auto 0 0 0;height:58%;background:linear-gradient(to top,rgba(0,0,0,.92),rgba(0,0,0,0));pointer-events:none}
+.ov{position:absolute;inset:auto 0 0 0;display:flex;align-items:flex-end;gap:12px;padding-bottom:16px}
+.meta{flex:1;min-width:0}
+.user{display:flex;align-items:center;gap:6px;font-weight:700;font-size:16px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border:1px solid rgba(200,205,213,.45);border-radius:999px;padding:3px 10px;color:var(--silver);background:rgba(5,5,6,.45)}
+.cap{margin:8px 0 0;font-size:14.5px;max-width:46ch;overflow-wrap:anywhere}
+.where{margin-top:6px;font-size:12.5px;color:var(--muted)}
+.cta{margin-top:12px;min-height:44px;padding:0 20px;border-radius:999px;border:0;background:var(--metal);color:#050506;font-weight:800;display:inline-flex;align-items:center;gap:8px}
+.cta.ghost{background:rgba(5,5,6,.5);color:var(--silver-hi);border:1px solid rgba(200,205,213,.5)}
+.rail{display:flex;flex-direction:column;gap:14px;align-items:center}
+.rbtn{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;font-weight:600;color:var(--silver-hi);min-width:44px;min-height:44px;justify-content:center}
+.rbtn[aria-pressed=true] svg.i{fill:var(--silver-hi)}
+.filter{position:absolute;top:12px;left:0;right:0;display:flex;z-index:2}
+.filter .chip{background:rgba(5,5,6,.7);min-height:32px;border-color:var(--silver)}
+.filter button.chip{cursor:pointer;color:var(--silver-hi)}
+.verified{display:inline-flex;align-items:center;gap:4px;color:var(--silver-hi);font-size:11.5px;font-weight:700}
+
+/* generic ui */
+h1,h2,h3{margin:0;font-family:var(--f-display);font-weight:700;letter-spacing:-.01em;text-wrap:balance}
+h1{font-size:20px;line-height:1.2}
+h2{font-size:14px;letter-spacing:.02em}
+.muted{color:var(--muted)}
+.small{font-size:12.5px}
+.stack{display:flex;flex-direction:column;gap:16px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label,.label{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+input[type=text],input[type=search],select,textarea{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-height:46px}
+textarea{min-height:92px;resize:none}
+select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 18px) 20px,calc(100% - 13px) 20px;background-size:5px 5px;background-repeat:no-repeat}
+.btn{min-height:46px;padding:0 20px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.primary{background:var(--metal);color:#050506;border:0}
+.btn.block{width:100%}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips .chip{flex:none;min-height:36px;cursor:pointer;font-size:12px}
+.chips .chip[aria-pressed=true]{background:var(--metal);color:#050506;border-color:transparent}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tile{position:relative;aspect-ratio:3/4;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#000;padding:0;text-align:left;display:block;width:100%}
+.tile .poster .word{font-size:min(13vw,60px);top:8%}
+.tile .tm{position:absolute;inset:auto 0 0 0;padding:28px 10px 10px;background:linear-gradient(to top,rgba(0,0,0,.9),transparent);font-size:12.5px}
+.tile .tm b{display:block;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.searchwrap{position:relative}
+.searchwrap svg{position:absolute;left:13px;top:13px;color:var(--muted)}
+.searchwrap input{padding-left:42px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px}
+.row{display:flex;align-items:center;gap:12px}
+.avatar{flex:none;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;color:#050506;background:var(--metal)}
+.empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:48px 8px;color:var(--muted)}
+.empty b{color:var(--silver-hi);font-family:var(--f-display);font-size:15px}
+.convo{width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:14px 0;color:inherit}
+.convo .snip{color:var(--muted);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.convo .body{min-width:0;flex:1}
+.tag{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:var(--silver-hi);color:#050506;border-radius:6px;padding:2px 6px}
+
+/* chat */
+.chat{height:100%;display:flex;flex-direction:column;min-height:0}
+.chat-head{display:flex;align-items:center;gap:10px;padding-block:10px;border-bottom:1px solid var(--line)}
+.iconbtn{width:44px;height:44px;border-radius:50%;border:0;background:none;display:grid;place-items:center;flex:none}
+.safe{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border-bottom:1px solid var(--line);padding-block:10px;font-size:12.5px;color:var(--silver)}
+.safe svg{flex:none;margin-top:1px}
+.msgs{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding-block:14px}
+.b{max-width:82%;padding:9px 13px;border-radius:16px;overflow-wrap:anywhere}
+.b.me{align-self:flex-end;background:#dde1e7;color:#07080a;border-bottom-right-radius:5px}
+.b.them{align-self:flex-start;background:var(--surface-2);border:1px solid var(--line);border-bottom-left-radius:5px}
+.b.sys{align-self:center;background:none;color:var(--muted);font-size:12.5px;text-align:center}
+.warn{background:rgba(255,122,108,.12);border-top:1px solid rgba(255,122,108,.5);color:var(--danger);padding-block:9px;font-size:12.5px;font-weight:600}
+.composer{display:flex;gap:8px;padding-block:10px;border-top:1px solid var(--line)}
+.composer input{flex:1;min-width:0;border-radius:999px}
+.send{width:46px;height:46px;border-radius:50%;border:0;background:var(--metal);color:#050506;display:grid;place-items:center;flex:none}
+.reqbar{display:flex;gap:10px;padding-block:12px;border-top:1px solid var(--line)}
+.reqbar .btn{flex:1}
+.links{display:flex;gap:16px;padding-block:8px;border-bottom:1px solid var(--line)}
+.links button{background:none;border:0;color:var(--muted);font-size:12.5px;font-weight:600;min-height:36px;padding:0;text-decoration:underline;text-underline-offset:3px}
+
+/* publish + profile */
+.drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:150px;border:1.5px dashed var(--silver);border-radius:16px;background:var(--surface);cursor:pointer;text-align:center;padding:14px;overflow:hidden}
+.drop video{width:100%;max-height:220px;border-radius:10px;background:#000}
+.drop input{position:absolute;width:1px;height:1px;opacity:0}
+.sw{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid var(--line)}
+.sw:last-child{border-bottom:0}
+.switch{flex:none;width:50px;height:30px;border-radius:15px;border:1px solid var(--line);background:var(--surface-2);position:relative;padding:0}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:var(--muted);transition:transform .18s}
+.switch[aria-checked=true]{background:var(--metal);border-color:transparent}
+.switch[aria-checked=true]::after{transform:translateX(20px);background:#050506}
+.switch[disabled]{opacity:.7}
+.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.list li{display:flex;gap:12px;align-items:flex-start;font-size:14px}
+.list svg{flex:none;margin-top:2px;color:var(--silver)}
+.slogan{text-align:center;font-family:var(--f-display);font-weight:700;font-size:14px;line-height:1.5;background:var(--metal);-webkit-background-clip:text;background-clip:text;color:transparent;padding-block:10px}
+.price{display:flex;align-items:baseline;gap:8px}
+.price b{font-family:var(--f-display);font-weight:800;font-size:38px;line-height:1;background:var(--metal);-webkit-background-clip:text;background-clip:text;color:transparent}
+.price span{color:var(--muted);font-weight:600}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);max-width:calc(100% - 32px);background:var(--silver-hi);color:#050506;font-weight:700;font-size:13.5px;padding:11px 16px;border-radius:12px;z-index:50;text-align:center}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+@media (min-width:700px){
+  #app{max-width:480px;margin:0 auto;border-left:1px solid var(--line);border-right:1px solid var(--line)}
+}
+</style>
+
+<div id="app">
+  <header class="top g">
+    <div class="logo" aria-label="Very Fast"><svg class="i" viewBox="0 0 24 24" width="18" height="18" style="fill:currentColor;stroke:none"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg><span>VERY FAST</span></div>
+    <div class="seg" role="group" aria-label="Eu sou">
+      <button id="r-talento" data-act="role" data-v="talento" aria-pressed="true">Talento</button>
+      <button id="r-empresa" data-act="role" data-v="empresa" aria-pressed="false">Empresa</button>
+    </div>
+  </header>
+  <main id="main"></main>
+  <nav class="tabs g" id="tabs" aria-label="Navegação"></nav>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+(function(){
+"use strict";
+var $=function(s){return document.querySelector(s)};
+var esc=function(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+var fmt=function(n){return n>=1000?(n/1000).toFixed(1).replace('.',',')+' mil':String(n)};
+
+var P={
+ bolt:'<path d="M13 2L4 14h6l-1 8 9-12h-6z" style="fill:currentColor;stroke:none"/>',
+ home:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+ compass:'<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',
+ chat:'<path d="M4 5h16v11H9l-5 4z"/>',
+ user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',
+ heart:'<path d="M12 20s-8-5-8-11a4.5 4.5 0 0 1 8-2.5A4.5 4.5 0 0 1 20 9c0 6-8 11-8 11z"/>',
+ share:'<path d="M4 12v7h16v-7M12 3v12M7 8l5-5 5 5"/>',
+ shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
+ send:'<path d="M4 12l16-8-6 16-3-7z"/>',
+ back:'<path d="M15 5l-7 7 7 7"/>',
+ x:'<path d="M6 6l12 12M18 6L6 18"/>',
+ play:'<path d="M8 5l11 7-11 7z" style="fill:currentColor;stroke:none"/>',
+ search:'<circle cx="11" cy="11" r="6.5"/><path d="M16 16l5 5"/>',
+ flag:'<path d="M5 21V4h11l-2 4 2 4H5"/>',
+ lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+ video:'<rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/>',
+ pin:'<path d="M12 21s7-6 7-11a7 7 0 0 0-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+ eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>'
+};
+function ic(n,s){s=s||22;return '<svg class="i" viewBox="0 0 24 24" width="'+s+'" height="'+s+'" aria-hidden="true">'+P[n]+'</svg>'}
+
+var CATS=['Futebol','Música','Dança','Culinária','Arte','Comédia','Basquetebol'];
+var CITIES=['Luanda','Benguela','Huambo','Lubango','Cabinda','Malanje','Uíge'];
+var BASE=[
+ {id:'p1',user:'mateus.10',cat:'Futebol',cap:'Drible curto e remate de fora da área. Procuro um clube para fazer testes.',city:'Luanda',likes:12400,seed:2},
+ {id:'p2',user:'kiala.voz',cat:'Música',cap:'Semba com guitarra acústica. Escrevi esta música para a minha avó.',city:'Benguela',likes:8300,seed:5},
+ {id:'p3',user:'kuduro.zona',cat:'Dança',cap:'Kuduro freestyle em 60 segundos. Quem quer gravar um clipe comigo?',city:'Luanda',likes:21700,seed:8},
+ {id:'p4',user:'tia.sabor',cat:'Culinária',cap:'Muamba de galinha feita do zero, com o tempero da família.',city:'Huambo',likes:5100,seed:3},
+ {id:'p5',user:'ngola.arte',cat:'Arte',cap:'Retrato a carvão em dez minutos. Aceito encomendas e exposições.',city:'Lubango',likes:3900,seed:11},
+ {id:'p6',user:'risofacil',cat:'Comédia',cap:'Sketch sobre o trânsito de Luanda às sete da manhã.',city:'Luanda',likes:15800,seed:6},
+ {id:'p7',user:'lulu.3pts',cat:'Basquetebol',cap:'Vinte lançamentos de três pontos seguidos. Sem edição.',city:'Cabinda',likes:6700,seed:9}
+];
+
+var PRICE='US$ 5';
+var save={role:'talento',liked:[],follow:[],mine:[],prefs:{hideCity:false,verifiedOnly:true},convos:null,paid:false,company:''};
+try{var r=JSON.parse(localStorage.getItem('vf2')||'null');if(r)save=Object.assign(save,r)}catch(e){}
+if(!save.convos){save.convos={
+ talento:[
+  {id:'c1',who:'Clube Atlético Sol',verified:true,status:'pending',msgs:[{f:'them',t:'Vimos o teu vídeo e gostámos do teu perfil. Podemos falar sobre um teste no clube?'}]},
+  {id:'c2',who:'Estúdio Kuduro Records',verified:true,status:'open',msgs:[{f:'them',t:'Olá! Estamos a procurar dançarinos para um videoclipe em Luanda.'},{f:'me',t:'Olá! Tenho interesse. Qual é a data prevista?'},{f:'them',t:'A gravação é no fim do mês. Enviamos os detalhes por aqui.'}]}
+ ],
+ empresa:[]
+}}
+function persist(){try{localStorage.setItem('vf2',JSON.stringify(save))}catch(e){}}
+
+var S={view:'feed',cat:null,q:'',focus:null,open:null,draft:null,warn:''};
+var videos={};
+var replies=['Obrigado pela resposta! Vamos avançar por aqui.','Perfeito. Podes enviar mais detalhes sobre a tua experiência?','Combinado. Marcamos os próximos passos no chat.','Gostámos muito. Vamos falar com a equipa e voltamos a escrever.'];
+var rIdx=0;
+
+var RULES=[
+ {re:/[\w.+-]+@[\w-]+\.[\w.]+/i,l:'um e-mail'},
+ {re:/(?:\+?\d[\s().-]*){8,}/,l:'um número de telefone ou de documento'},
+ {re:/https?:\/\/|www\.|\b[\w-]+\.(com|ao|net|org|me)\b/i,l:'uma ligação externa'},
+ {re:/whats\s?app|telegram|instagram|facebook|\bzap\b|\biban\b|\bnib\b|multicaixa|bilhete de identidade|rua\s+\w+|bairro\s+\w+/i,l:'um contacto, morada ou dado de pagamento'}
+];
+function scan(t){for(var i=0;i<RULES.length;i++){if(RULES[i].re.test(t))return RULES[i].l}return null}
+
+function toast(t){var el=$('#toast');el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(function(){el.hidden=true},2600)}
+
+function posts(){
+ var l=save.mine.map(function(p){return Object.assign({mine:true},p)}).concat(BASE);
+ if(S.cat)l=l.filter(function(p){return p.cat===S.cat});
+ if(S.q){var q=S.q.toLowerCase();l=l.filter(function(p){return (p.user+' '+p.cap+' '+p.cat+' '+p.city).toLowerCase().indexOf(q)>-1})}
+ return l;
+}
+function poster(p){
+ var a=(p.seed*47)%360;
+ if(videos[p.id])return '<div class="poster"><video src="'+videos[p.id]+'" controls playsinline loop muted></video></div>';
+ return '<div class="poster" style="--a:'+a+'deg"><span class="word">'+esc(p.cat)+'</span><span class="play">'+ic('play',26)+'</span></div>';
+}
+function cityOf(p){return p.mine&&save.prefs.hideCity?'Angola':p.city}
+
+function postHTML(p){
+ var liked=save.liked.indexOf(p.id)>-1,fol=save.follow.indexOf(p.user)>-1;
+ var cta='';
+ if(p.mine)cta='<span class="chip">O teu vídeo</span>';
+ else if(save.role==='empresa')cta='<button class="cta" data-act="pull" data-id="'+p.id+'">'+ic('send',18)+'Puxar talento</button>';
+ else cta='<button class="cta ghost" data-act="follow" data-user="'+esc(p.user)+'" aria-pressed="'+fol+'">'+(fol?'A seguir':'Seguir')+'</button>';
+ return '<article class="post" id="post-'+p.id+'" data-id="'+p.id+'">'+poster(p)+'<div class="shade"></div>'+
+ '<div class="ov g"><div class="meta"><div class="user">@'+esc(p.user)+'</div>'+
+ '<div style="margin-top:6px"><span class="chip">'+esc(p.cat)+'</span></div>'+
+ '<p class="cap">'+esc(p.cap)+'</p><div class="where">'+ic('pin',13).replace('class="i"','class="i" style="display:inline;vertical-align:-2px"')+' '+esc(cityOf(p))+'</div>'+cta+'</div>'+
+ '<div class="rail"><button class="rbtn" data-act="like" data-id="'+p.id+'" aria-pressed="'+liked+'" aria-label="Gostar">'+ic('heart',30)+'<span>'+fmt(p.likes+(liked?1:0))+'</span></button>'+
+ '<button class="rbtn" data-act="share" aria-label="Partilhar">'+ic('share',28)+'<span>Partilhar</span></button>'+
+ '<button class="rbtn" data-act="report" aria-label="Denunciar">'+ic('flag',26)+'<span>Denunciar</span></button></div></div></article>';
+}
+
+function viewFeed(){
+ var l=posts(),h='';
+ if(S.cat)h+='<div class="filter g"><button class="chip" data-act="clear">'+esc(S.cat)+' '+ic('x',14)+'</button></div>';
+ if(!l.length)return h+'<div class="view g"><div class="empty"><b>Nenhum talento encontrado</b><span>Tenta outra categoria ou limpa a pesquisa.</span><button class="btn primary" data-act="clear">Ver todos</button></div></div>';
+ return h+'<div class="feed" id="feed">'+l.map(postHTML).join('')+'</div>';
+}
+
+function chipsHTML(){
+ return '<div class="chips" role="group" aria-label="Categorias"><button class="chip" data-act="cat" data-v="" aria-pressed="'+(!S.cat)+'">Todos</button>'+
+ CATS.map(function(c){return '<button class="chip" data-act="cat" data-v="'+c+'" aria-pressed="'+(S.cat===c)+'">'+c+'</button>'}).join('')+'</div>';
+}
+function gridHTML(){
+ var l=posts();
+ if(!l.length)return '<div class="empty"><b>Sem resultados</b><span>Experimenta outra palavra ou categoria.</span></div>';
+ return '<div class="grid">'+l.map(function(p){return '<button class="tile" data-act="open" data-id="'+p.id+'">'+poster(p).replace(/<video[^>]*><\/video>/,'')+'<div class="tm"><b>@'+esc(p.user)+'</b><span class="muted">'+esc(cityOf(p))+' · '+fmt(p.likes)+'</span></div></button>'}).join('')+'</div>';
+}
+function viewDiscover(){
+ return '<div class="view"><div class="pad g stack"><h1>Descobrir talentos</h1>'+
+ '<div class="searchwrap">'+ic('search',20)+'<input type="search" id="q" placeholder="Procurar por nome, talento ou cidade" value="'+esc(S.q)+'" autocomplete="off"></div>'+
+ chipsHTML()+'<div id="grid">'+gridHTML()+'</div></div></div>';
+}
+
+function viewPublish(){
+ if(save.role!=='talento')return '<div class="view g"><div class="empty"><b>Publicar é para talentos</b><span>Como empresa, procura talentos no feed e toca em Puxar talento para conversar.</span><button class="btn primary" data-act="role" data-v="talento">Mudar para Talento</button></div></div>';
+ var d=S.draft;
+ return '<div class="view"><form class="pad g stack" id="pf" novalidate><h1>Mostra o teu talento</h1>'+
+ '<label class="drop" for="pv" id="drop">'+(d?'<video src="'+d.url+'" controls playsinline muted></video><span class="small muted">'+esc(d.name)+'</span>':ic('video',34)+'<b>Escolher vídeo</b><span class="small muted">Do teu telemóvel. Máximo recomendado: 60 segundos.</span>')+
+ '<input type="file" id="pv" accept="video/*"></label>'+
+ '<div class="field"><label for="pc">Categoria</label><select id="pc">'+CATS.map(function(c){return '<option>'+c+'</option>'}).join('')+'</select></div>'+
+ '<div class="field"><label for="cap">Legenda</label><textarea id="cap" maxlength="140" placeholder="O que fazes e o que procuras?"></textarea><div class="row" style="justify-content:space-between"><span class="small muted">Não escrevas telefone, e-mail ou morada.</span><span class="small muted" id="cnt">0/140</span></div></div>'+
+ '<div class="field"><label for="pcity">Cidade</label><select id="pcity">'+CITIES.map(function(c){return '<option>'+c+'</option>'}).join('')+'</select></div>'+
+ '<div class="warn" id="pwarn" role="alert" hidden style="border-radius:10px;border:1px solid rgba(255,122,108,.5)"></div>'+
+ '<button class="btn primary block" type="submit">Publicar</button></form></div>';
+}
+
+function viewGate(){
+ return '<div class="view"><form class="pad g stack" id="gf" novalidate><span class="chip" style="align-self:flex-start">Conta de empresa</span><h1>Encontra talentos antes de todos</h1>'+
+ '<div class="card"><div class="price"><b>'+PRICE+'</b><span>por mês</span></div><p class="small muted" style="margin:8px 0 0">Um preço único para empresas de qualquer país, menos de 17 cêntimos de dólar por dia.</p></div>'+
+ '<ul class="list"><li>'+ic('send',20)+'<span>Puxa quantos talentos quiseres e conversa com eles no aplicativo.</span></li>'+
+ '<li>'+ic('shield',20)+'<span>Recebes o selo de empresa verificada depois de validarmos o teu nome.</span></li>'+
+ '<li>'+ic('lock',20)+'<span>Cancelas quando quiseres. Para talentos, o Very Fast é grátis.</span></li></ul>'+
+ '<div class="field"><label for="co">Nome da empresa</label><input type="text" id="co" maxlength="60" placeholder="Ex.: Clube Atlético Sol" autocomplete="organization"></div>'+
+ '<label class="row small" for="ok" style="align-items:flex-start"><input type="checkbox" id="ok" style="margin-top:2px;width:20px;height:20px;flex:none"><span>Aceito as regras: não peço dinheiro, contactos nem dados pessoais aos talentos.</span></label>'+
+ '<div class="warn" id="gwarn" role="alert" hidden style="border-radius:10px;border:1px solid rgba(255,122,108,.5)"></div>'+
+ '<button class="btn primary block" type="submit">Criar conta e pagar '+PRICE+'</button>'+
+ '<p class="small muted" style="margin:0">Demonstração: o pagamento é simulado. Na versão real, pagas no site seguro do processador de pagamentos e o Very Fast nunca vê o teu cartão.</p></form></div>';
+}
+function convos(){return save.convos[save.role]}
+function viewInbox(){
+ if(S.open)return viewChat();
+ var l=convos();
+ var h='<div class="view"><div class="pad g"><h1 style="margin-bottom:6px">Mensagens</h1><p class="muted small" style="margin:0 0 6px">'+(save.role==='empresa'?'Conversas com talentos que puxaste.':'Empresas e clubes que querem falar contigo.')+'</p>';
+ if(!l.length)h+='<div class="empty"><b>Ainda não tens conversas</b><span>Vai ao feed e toca em Puxar talento num vídeo que gostes.</span><button class="btn primary" data-act="go" data-v="feed">Ver talentos</button></div>';
+ l.forEach(function(c){var last=c.msgs[c.msgs.length-1];
+  h+='<button class="convo row" data-act="chat" data-id="'+c.id+'"><span class="avatar">'+esc(c.who.replace('@','').charAt(0).toUpperCase())+'</span><span class="body"><span class="row" style="gap:8px"><b>'+esc(c.who)+'</b>'+(c.verified?'<span class="verified">'+ic('shield',15)+'Verificada</span>':'')+(c.status==='pending'?'<span class="tag">Pedido</span>':'')+'</span><span class="snip" style="display:block">'+esc(last?last.t:'')+'</span></span></button>'});
+ return h+'</div></div>';
+}
+function viewChat(){
+ var c=convos().filter(function(x){return x.id===S.open})[0];
+ if(!c){S.open=null;return viewInbox()}
+ var m=c.msgs.map(function(x){return '<div class="b '+x.f+'">'+esc(x.t)+'</div>'}).join('');
+ var bottom=c.status==='pending'
+  ?'<div class="reqbar g"><button class="btn" data-act="decline">Recusar</button><button class="btn primary" data-act="accept">Aceitar conversa</button></div>'
+  :'<div id="warn" class="warn g" role="alert" '+(S.warn?'':'hidden')+'>'+esc(S.warn)+'</div><form class="composer g" id="cf"><input type="text" id="ci" maxlength="400" autocomplete="off" placeholder="Escreve uma mensagem" aria-label="Mensagem"><button class="send" aria-label="Enviar">'+ic('send',20)+'</button></form>';
+ return '<div class="chat"><div class="chat-head g"><button class="iconbtn" data-act="back" aria-label="Voltar">'+ic('back',24)+'</button><span class="avatar" style="width:38px;height:38px">'+esc(c.who.replace('@','').charAt(0).toUpperCase())+'</span><div style="min-width:0"><b style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(c.who)+'</b>'+(c.verified?'<span class="verified">'+ic('shield',14)+'Empresa verificada</span>':'<span class="small muted">Talento</span>')+'</div></div>'+
+ '<div class="safe g">'+ic('lock',18)+'<span>Conversa protegida. Não partilhes telefone, e-mail, morada ou pagamentos. Negociem só aqui no Very Fast.</span></div>'+
+ '<div class="links g"><button data-act="report">Denunciar</button><button data-act="block">Bloquear</button></div>'+
+ '<div class="msgs g" id="msgs">'+m+'</div>'+bottom+'</div>';
+}
+
+function sw(id,label,sub,on,locked){
+ return '<div class="sw"><div><b>'+label+'</b><div class="small muted">'+sub+'</div></div><button class="switch" role="switch" id="'+id+'" aria-label="'+label+'" aria-checked="'+on+'" '+(locked?'disabled':'data-act="pref" data-k="'+id+'"')+'></button></div>';
+}
+function viewProfile(){
+ var emp=save.role==='empresa';
+ return '<div class="view"><div class="pad g stack">'+
+ '<div class="row"><span class="avatar" style="width:64px;height:64px;font-size:22px">'+(emp?'E':'T')+'</span><div><h1>'+(emp?esc(save.company||'A tua empresa'):'@o.teu.talento')+'</h1><span class="small muted">'+(emp?'Plano ativo · verificação pendente':'Perfil sem dados pessoais')+'</span></div></div>'+
+ '<div class="card"><h2 style="margin-bottom:6px">Privacidade</h2>'+
+ sw('hideCity','Esconder a minha cidade','Os teus vídeos mostram só "Angola".',save.prefs.hideCity,false)+
+ sw('verifiedOnly','Só empresas verificadas','Apenas empresas com selo podem puxar-te.',save.prefs.verifiedOnly,false)+
+ sw('realname','Nome real escondido','Usas sempre um nome de utilizador.',true,true)+'</div>'+
+ (emp?'<div class="card"><h2 style="margin-bottom:6px">Plano da empresa</h2><p class="small muted" style="margin:0 0 12px">'+PRICE+' por mês. Cancelas quando quiseres.</p><button class="btn block" data-act="cancel">Cancelar plano</button></div>':'')+
+ '<div class="card"><h2 style="margin-bottom:12px">Como te protegemos</h2><ul class="list">'+
+ '<li>'+ic('user',20)+'<span>Para criar conta não pedimos telefone, e-mail nem documento.</span></li>'+
+ '<li>'+ic('lock',20)+'<span>O chat bloqueia mensagens com contactos, moradas e dados de pagamento.</span></li>'+
+ '<li>'+ic('shield',20)+'<span>Empresas verificadas têm selo. Desconfia de quem pede dinheiro.</span></li>'+
+ '<li>'+ic('flag',20)+'<span>Podes denunciar e bloquear qualquer pessoa em dois toques.</span></li></ul></div>'+
+ '<p class="small muted" style="margin:0">Versão de demonstração: os dados ficam só neste telemóvel, sem servidor.</p>'+
+ '<div class="slogan">Very Fast, onde você cria a tua própria oportunidade.</div></div></div>';
+}
+
+function pendingCount(){return convos().filter(function(c){return c.status==='pending'}).length}
+function renderTabs(){
+ var items=[['feed','home','Início'],['discover','compass','Descobrir'],['publish','plus','Publicar'],['inbox','chat','Mensagens'],['profile','user','Perfil']];
+ $('#tabs').innerHTML=items.map(function(t){
+  var icon=t[0]==='publish'?'<span class="pl">'+ic('plus',22)+'</span>':ic(t[1],24);
+  var dot=t[0]==='inbox'&&pendingCount()?'<span class="dot">'+pendingCount()+'</span>':'';
+  return '<button class="tab" data-act="go" data-v="'+t[0]+'" aria-current="'+(S.view===t[0])+'">'+icon+'<span>'+t[2]+'</span>'+dot+'</button>'}).join('');
+ $('#r-talento').setAttribute('aria-pressed',save.role==='talento');
+ $('#r-empresa').setAttribute('aria-pressed',save.role==='empresa');
+}
+function render(){
+ var v=(save.role==='empresa'&&!save.paid)?viewGate():{feed:viewFeed,discover:viewDiscover,publish:viewPublish,inbox:viewInbox,profile:viewProfile}[S.view]();
+ $('#main').innerHTML=v;renderTabs();
+ if(S.view==='feed'&&S.focus){var el=document.getElementById('post-'+S.focus);if(el){var f=$('#feed');f.style.scrollSnapType='none';f.scrollTop=el.offsetTop;requestAnimationFrame(function(){f.style.scrollSnapType=''})}S.focus=null}
+ var ms=$('#msgs');if(ms)ms.scrollTop=ms.scrollHeight;
+}
+function go(v){S.view=v;if(v!=='inbox'){S.open=null}S.warn='';render()}
+
+function pull(id){
+ var p=posts().filter(function(x){return x.id===id})[0];if(!p)return;
+ var l=save.convos.empresa,w='@'+p.user,c=l.filter(function(x){return x.who===w})[0];
+ if(!c){c={id:'e'+Date.now(),who:w,verified:false,status:'open',msgs:[{f:'sys',t:'Puxaste @'+p.user+'. Podem conversar aqui, com segurança.'}]};l.unshift(c);persist();
+  setTimeout(function(){c.msgs.push({f:'them',t:'Olá! Obrigado pelo interesse. Fala-me mais sobre a proposta.'});persist();if(S.view==='inbox'&&S.open===c.id)render();else renderTabs()},1600)}
+ S.view='inbox';S.open=c.id;S.warn='';render();
+}
+function sendMsg(txt){
+ var c=convos().filter(function(x){return x.id===S.open})[0];if(!c)return;
+ var bad=scan(txt);
+ if(bad){S.warn='Mensagem não enviada: parece conter '+bad+'. Por segurança, negociem só aqui no Very Fast.';var w=$('#warn');w.textContent=S.warn;w.hidden=false;return}
+ S.warn='';c.msgs.push({f:'me',t:txt});persist();render();
+ var id=c.id;setTimeout(function(){c.msgs.push({f:'them',t:replies[rIdx++%replies.length]});persist();if(S.view==='inbox'&&S.open===id)render()},1500);
+ var i=$('#ci');if(i)i.focus();
+}
+
+document.addEventListener('click',function(e){
+ var b=e.target.closest('[data-act]');if(!b)return;
+ var a=b.dataset.act;
+ if(a==='role'){save.role=b.dataset.v;S.open=null;persist();render()}
+ else if(a==='go')go(b.dataset.v);
+ else if(a==='cat'){S.cat=b.dataset.v||null;var g=$('#grid');if(g){g.innerHTML=gridHTML();$('.chips').outerHTML=chipsHTML()}}
+ else if(a==='clear'){S.cat=null;S.q='';render()}
+ else if(a==='open'){S.focus=b.dataset.id;S.view='feed';render()}
+ else if(a==='like'){var id=b.dataset.id,i=save.liked.indexOf(id);if(i>-1)save.liked.splice(i,1);else save.liked.push(id);persist();
+  var p=posts().filter(function(x){return x.id===id})[0],on=save.liked.indexOf(id)>-1;b.setAttribute('aria-pressed',on);b.querySelector('span').textContent=fmt(p.likes+(on?1:0))}
+ else if(a==='follow'){var u=b.dataset.user,j=save.follow.indexOf(u);if(j>-1)save.follow.splice(j,1);else save.follow.push(u);persist();b.setAttribute('aria-pressed',j<0);b.textContent=j<0?'A seguir':'Seguir'}
+ else if(a==='pull')pull(b.dataset.id);
+ else if(a==='share'){var t='Very Fast, onde você cria a tua própria oportunidade.';try{navigator.clipboard.writeText(t).then(function(){toast('Texto copiado')},function(){toast('Não foi possível copiar')})}catch(err){toast('Não foi possível copiar')}}
+ else if(a==='report')toast('Denúncia enviada. Vamos rever este conteúdo.');
+ else if(a==='chat'){S.open=b.dataset.id;S.warn='';render()}
+ else if(a==='back'){S.open=null;S.warn='';render()}
+ else if(a==='accept'){var c=convos().filter(function(x){return x.id===S.open})[0];c.status='open';c.msgs.push({f:'sys',t:'Conversa aceite. Lembra-te: nada de contactos ou pagamentos fora do Very Fast.'});persist();render()}
+ else if(a==='decline'||a==='block'){var l=convos();for(var k=0;k<l.length;k++){if(l[k].id===S.open){l.splice(k,1);break}}S.open=null;persist();render();toast(a==='block'?'Utilizador bloqueado':'Pedido recusado')}
+ else if(a==='cancel'){save.paid=false;S.view='feed';persist();render();toast('Plano cancelado')}
+ else if(a==='pref'){var key=b.dataset.k;save.prefs[key]=!save.prefs[key];persist();b.setAttribute('aria-checked',save.prefs[key])}
+});
+document.addEventListener('input',function(e){
+ if(e.target.id==='q'){S.q=e.target.value;$('#grid').innerHTML=gridHTML()}
+ if(e.target.id==='cap'){$('#cnt').textContent=e.target.value.length+'/140'}
+});
+document.addEventListener('change',function(e){
+ if(e.target.id==='pv'&&e.target.files&&e.target.files[0]){
+  var f=e.target.files[0];if(S.draft)try{URL.revokeObjectURL(S.draft.url)}catch(x){}
+  S.draft={file:f,url:URL.createObjectURL(f),name:f.name};
+  var cap=$('#cap').value,cat=$('#pc').value,city=$('#pcity').value;render();$('#cap').value=cap;$('#pc').value=cat;$('#pcity').value=city;$('#cnt').textContent=cap.length+'/140';
+ }
+});
+document.addEventListener('submit',function(e){
+ e.preventDefault();
+ if(e.target.id==='cf'){var t=$('#ci').value.trim();if(t)sendMsg(t)}
+ if(e.target.id==='gf'){
+  var co=$('#co').value.trim(),gw=$('#gwarn');
+  if(co.length<2){gw.textContent='Escreve o nome da empresa.';gw.hidden=false;return}
+  if(scan(co)){gw.textContent='O nome não pode conter contactos nem dados pessoais.';gw.hidden=false;return}
+  if(!$('#ok').checked){gw.textContent='Aceita as regras para continuar.';gw.hidden=false;return}
+  save.company=co;save.paid=true;persist();S.view='feed';render();toast('Demonstração: conta de empresa criada');return;
+ }
+ if(e.target.id==='pf'){
+  var cap=$('#cap').value.trim(),w=$('#pwarn');
+  if(cap.length<5){w.textContent='Escreve uma legenda com pelo menos 5 letras.';w.hidden=false;return}
+  var bad=scan(cap);if(bad){w.textContent='A legenda parece conter '+bad+'. Remove para proteger a tua segurança.';w.hidden=false;return}
+  var id='m'+Date.now(),p={id:id,user:'o.teu.talento',cat:$('#pc').value,cap:cap,city:$('#pcity').value,likes:0,seed:(Date.now()%12)+1};
+  save.mine.unshift(p);if(S.draft){videos[id]=S.draft.url;S.draft=null}
+  persist();S.cat=null;S.q='';S.view='feed';render();$('#feed').scrollTop=0;toast('Publicado. Já estás no feed!');
+ }
+});
+render();
+})();
+</script>
+
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}</script>
+</html>
